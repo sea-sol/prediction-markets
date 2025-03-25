@@ -6,3 +6,8 @@ pub struct GlobalInitialized {
     pub fee_recipient: Pubkey,
     pub fee_percentage: u16,
 }
+
+#[event]
+pub struct OracleResUpdated {
+    pub oracle_res: f64,
+}

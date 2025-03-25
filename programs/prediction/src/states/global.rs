@@ -7,3 +7,9 @@ pub struct Global {
     pub fee_authority: Pubkey,
     pub fee_percentage: u16,
 }
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct GlobalParams {
+    pub fee_authority: Pubkey,
+    pub fee_percentage: u16,
+}
