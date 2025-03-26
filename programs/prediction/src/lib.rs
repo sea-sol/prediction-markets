@@ -4,6 +4,7 @@ pub mod errors;
 pub mod events;
 pub mod instructions;
 pub mod states;
+pub mod utils;
 use instructions::{get_oracle_res::*, init::*};
 use states::global::GlobalParams;
 

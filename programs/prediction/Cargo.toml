@@ -17,5 +17,6 @@ default = []
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed", "event-cpi"] }
+anchor-spl = { version = "0.29.0", features = ["metadata"] }
 switchboard-solana = "0.29.79"
 switchboard-on-demand = "0.1.12"
