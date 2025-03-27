@@ -1,8 +1,5 @@
-use anchor_lang::solana_program::{program::invoke, system_instruction::transfer};
 use anchor_lang::{prelude::*, solana_program};
 use anchor_spl::token;
-use solana_program::system_program;
-use std::cmp::Ordering;
 
 pub fn sol_transfer<'a>(
     from_account: AccountInfo<'a>,

@@ -1,3 +1,4 @@
+use crate::constants::MARKET_SEED;
 use anchor_lang::prelude::*;
 
 #[account]
@@ -6,31 +7,35 @@ use anchor_lang::prelude::*;
 pub struct Market {
     pub creator: Pubkey,
     pub feed: Pubkey,
-    pub quest: u64,
+    pub quest: u16,
     pub market_status: MarketStatus,
     pub result: bool,
     pub token_a: Pubkey,
     pub token_b: Pubkey,
-    pub token_a_amount: u64,
-    pub token_b_amount: u64,
 }
 
 impl Market {
+    pub fn get_signer<'a>(bump: &'a u8, user: &'a Pubkey) -> [&'a [u8]; 3] {
+        [
+            MARKET_SEED.as_bytes(),
+            user.as_ref(),
+            std::slice::from_ref(bump),
+        ]
+    }
+
     pub fn update_market_settings(
         &mut self,
-        params: MarketParams,
+        quest: u16,
         creator: Pubkey,
         feed: Pubkey,
         token_a: Pubkey,
         token_b: Pubkey,
     ) {
         self.creator = creator;
-        self.quest = params.quest;
+        self.quest = quest;
         self.feed = feed;
         self.token_a = token_a;
         self.token_b = token_b;
-        self.token_a_amount = params.token_a_amount;
-        self.token_b_amount = params.token_b_amount;
     }
 
     pub fn update_market_status(&mut self, market_status: MarketStatus) {
@@ -45,14 +50,21 @@ impl Market {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, InitSpace, Debug, PartialEq)]
 pub enum MarketStatus {
     Prepare,
-    NoActive,
     Active,
     Finished,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
+#[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct MarketParams {
-    pub quest: u64,
+    pub quest: u16,
     pub token_a_amount: u64,
     pub token_b_amount: u64,
+    pub init_price_a: u64,
+    pub init_price_b: u64,
+    pub name_a: Option<String>,
+    pub name_b: Option<String>,
+    pub symbol_a: Option<String>,
+    pub symbol_b: Option<String>,
+    pub url_a: Option<String>,
+    pub url_b: Option<String>,
 }

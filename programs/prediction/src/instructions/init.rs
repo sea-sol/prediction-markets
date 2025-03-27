@@ -16,11 +16,20 @@ pub fn init(ctx: Context<Initialize>, params: GlobalParams) -> Result<()> {
     let global = &mut ctx.accounts.global;
     global.admin = ctx.accounts.payer.key();
     global.fee_authority = params.fee_authority;
-    global.fee_percentage = params.fee_percentage;
+    global.creator_fee_amount = params.creator_fee_amount;
+    global.liqudity_user_fee_amount = params.liqudity_user_fee_amount;
+    global.betting_user_fee_amount = params.betting_user_fee_amount;
+    global.market_count = params.market_count;
+    global.decimal = params.decimal;
+
     emit!(GlobalInitialized {
         global_id: global.key(),
         fee_recipient: global.fee_authority,
-        fee_percentage: global.fee_percentage,
+        creator_fee_amount: global.creator_fee_amount,
+        liqudity_user_fee_amount: global.liqudity_user_fee_amount,
+        betting_user_fee_amount: global.betting_user_fee_amount,
+        market_count: global.market_count,
+        decimal: global.decimal,
     });
 
     Ok(())

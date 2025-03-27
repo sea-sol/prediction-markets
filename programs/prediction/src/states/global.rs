@@ -5,11 +5,19 @@ use anchor_lang::prelude::*;
 pub struct Global {
     pub admin: Pubkey,
     pub fee_authority: Pubkey,
-    pub fee_percentage: u16,
+    pub creator_fee_amount: u64,
+    pub liqudity_user_fee_amount: u64,
+    pub betting_user_fee_amount: u64,
+    pub decimal: u8,
+    pub market_count: u64,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct GlobalParams {
     pub fee_authority: Pubkey,
-    pub fee_percentage: u16,
+    pub creator_fee_amount: u64,
+    pub liqudity_user_fee_amount: u64,
+    pub betting_user_fee_amount: u64,
+    pub market_count: u64,
+    pub decimal: u8,
 }

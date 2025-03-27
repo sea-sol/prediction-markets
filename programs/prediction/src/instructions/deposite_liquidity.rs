@@ -1,0 +1,81 @@
+use crate::constants::{GLOBAL_SEED, MARKET_SEED};
+use crate::states::{
+    global::Global,
+    market::{Market, MarketStatus},
+};
+use anchor_lang::{prelude::*, solana_program};
+
+#[derive(Accounts)]
+pub struct DepositLiquidity<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    /// CHECK: creator is checked in constraint
+    pub creator: AccountInfo<'info>,
+
+    /// CHECK: global fee authority is checked in constraint
+    #[account(
+        mut,
+        constraint = fee_authority.key() == global.fee_authority
+    )]
+    pub fee_authority: AccountInfo<'info>,
+
+    #[account(
+        mut,
+        seeds = [MARKET_SEED.as_bytes(), creator.key().as_ref()],
+        constraint = market.market_status == MarketStatus::Prepare,
+        bump
+    )]
+    pub market: Account<'info, Market>,
+
+    #[account(
+        seeds = [GLOBAL_SEED.as_bytes()],
+        bump
+    )]
+    pub global: Account<'info, Global>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn deposit_liquidity(ctx: Context<DepositLiquidity>, amount: u64) -> Result<()> {
+    // Transfer sol to market
+    let liquidity_transfer_instruction = solana_program::system_instruction::transfer(
+        ctx.accounts.user.key,
+        &ctx.accounts.market.key(),
+        amount,
+    );
+
+    anchor_lang::solana_program::program::invoke_signed(
+        &liquidity_transfer_instruction,
+        &[
+            ctx.accounts.user.to_account_info(),
+            ctx.accounts.market.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        ],
+        &[],
+    )?;
+
+    // Transfer sol to fee authority
+    let transfer_instruction = solana_program::system_instruction::transfer(
+        ctx.accounts.user.key,
+        &ctx.accounts.fee_authority.key(),
+        ctx.accounts.global.liqudity_user_fee_amount,
+    );
+
+    anchor_lang::solana_program::program::invoke_signed(
+        &transfer_instruction,
+        &[
+            ctx.accounts.user.to_account_info(),
+            ctx.accounts.fee_authority.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        ],
+        &[],
+    )?;
+
+    // Update market status
+    let market_balance = ctx.accounts.market.get_lamports();
+    if market_balance >= ctx.accounts.global.market_count {
+        ctx.accounts.market.market_status = MarketStatus::Active;
+    }
+    Ok(())
+}
