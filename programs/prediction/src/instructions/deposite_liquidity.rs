@@ -1,4 +1,6 @@
 use crate::constants::{GLOBAL_SEED, MARKET_SEED};
+use crate::errors::ContractError;
+use crate::events::MarketStatusUpdated;
 use crate::states::{
     global::Global,
     market::{Market, MarketStatus},
@@ -16,14 +18,14 @@ pub struct DepositLiquidity<'info> {
     /// CHECK: global fee authority is checked in constraint
     #[account(
         mut,
-        constraint = fee_authority.key() == global.fee_authority
+        constraint = fee_authority.key() == global.fee_authority @ ContractError::InvalidFeeAuthority
     )]
     pub fee_authority: AccountInfo<'info>,
 
     #[account(
         mut,
         seeds = [MARKET_SEED.as_bytes(), creator.key().as_ref()],
-        constraint = market.market_status == MarketStatus::Prepare,
+        constraint = market.market_status == MarketStatus::Prepare @ ContractError::NotPreparing,
         bump
     )]
     pub market: Account<'info, Market>,
@@ -77,5 +79,10 @@ pub fn deposit_liquidity(ctx: Context<DepositLiquidity>, amount: u64) -> Result<
     if market_balance >= ctx.accounts.global.market_count {
         ctx.accounts.market.market_status = MarketStatus::Active;
     }
+
+    emit!(MarketStatusUpdated {
+        market_id: ctx.accounts.market.key(),
+        market_status: ctx.accounts.market.market_status,
+    });
     Ok(())
 }

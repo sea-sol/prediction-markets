@@ -11,4 +11,14 @@ pub enum ContractError {
     ConfidenceIntervalExceeded,
     #[msg("Current SOL price is not above Escrow unlock price.")]
     SolPriceBelowUnlockPrice,
+    #[msg("Arithmetic error")]
+    ArithmeticError,
+    #[msg("Invalid fee authority")]
+    InvalidFeeAuthority,
+    #[msg("Not preparing status")]
+    NotPreparing,
+    #[msg("Invalid market")]
+    InvalidMarket,
+    #[msg("Market is not active")]
+    MarketNotActive,
 }

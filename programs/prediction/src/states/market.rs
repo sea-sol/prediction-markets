@@ -12,6 +12,12 @@ pub struct Market {
     pub result: bool,
     pub token_a: Pubkey,
     pub token_b: Pubkey,
+    pub token_a_amount: u64,
+    pub token_b_amount: u64,
+    pub token_price_a: u64,
+    pub token_price_b: u64,
+    pub yes_amount: u16,
+    pub no_amount: u16,
 }
 
 impl Market {
@@ -30,12 +36,22 @@ impl Market {
         feed: Pubkey,
         token_a: Pubkey,
         token_b: Pubkey,
+        token_a_amount: u64,
+        token_b_amount: u64,
+        token_price_a: u64,
+        token_price_b: u64,
     ) {
         self.creator = creator;
         self.quest = quest;
         self.feed = feed;
         self.token_a = token_a;
         self.token_b = token_b;
+        self.token_a_amount = token_a_amount;
+        self.token_b_amount = token_b_amount;
+        self.token_price_a = token_price_a;
+        self.token_price_b = token_price_b;
+        self.yes_amount = 1;
+        self.no_amount = 1;
     }
 
     pub fn update_market_status(&mut self, market_status: MarketStatus) {
@@ -59,12 +75,18 @@ pub struct MarketParams {
     pub quest: u16,
     pub token_a_amount: u64,
     pub token_b_amount: u64,
-    pub init_price_a: u64,
-    pub init_price_b: u64,
+    pub token_price_a: u64,
+    pub token_price_b: u64,
     pub name_a: Option<String>,
     pub name_b: Option<String>,
     pub symbol_a: Option<String>,
     pub symbol_b: Option<String>,
     pub url_a: Option<String>,
     pub url_b: Option<String>,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct BettingParams {
+    pub amount: u64,
+    pub is_yes: bool,
 }

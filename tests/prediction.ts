@@ -41,6 +41,7 @@ describe("prediction", () => {
       liqudityUserFeeAmount: new BN(0.001 * 10 ** 9),
       bettingUserFeeAmount: new BN(0.001 * 10 ** 9),
       marketCount: new BN(0.1 * 10 ** 9),
+      decimal: 9,
     }).accounts({
       global,
       payer: owner.publicKey,
@@ -70,7 +71,20 @@ describe("prediction", () => {
     let pdaTokenBAccount = await getAssociatedTokenAccount(market, tokenB);
 
     // Create market //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    const tx = await program.methods.initMarket(190, tokenA, tokenB).accounts({
+    const tx = await program.methods.initMarket({
+      quest: 190,
+      tokenAAmount: new BN(tokenAAmount),
+      tokenBAmount: new BN(tokenBAmount),
+      tokenPriceA: new BN(0.05 * 10 ** 9),
+      tokenPriceB: new BN(0.05 * 10 ** 9),
+      nameA: "tokenA",
+      nameB: "tokenB",
+      symbolA: "tokenA",
+      symbolB: "tokenB",
+      urlA: "https://tokenA.com",
+      urlB: "https://tokenB.com",
+
+    }).accounts({
       user: owner.publicKey,
       market,
       feed: new PublicKey("5mXfTYitRFsWPhdJfp2fc8N6hK8cw6NB5jAYpronQasj"),

@@ -21,7 +21,7 @@ pub fn init(ctx: Context<Initialize>, params: GlobalParams) -> Result<()> {
     global.betting_user_fee_amount = params.betting_user_fee_amount;
     global.market_count = params.market_count;
     global.decimal = params.decimal;
-
+    global.fee_percentage = params.fee_percentage;
     emit!(GlobalInitialized {
         global_id: global.key(),
         fee_recipient: global.fee_authority,
@@ -30,6 +30,7 @@ pub fn init(ctx: Context<Initialize>, params: GlobalParams) -> Result<()> {
         betting_user_fee_amount: global.betting_user_fee_amount,
         market_count: global.market_count,
         decimal: global.decimal,
+        fee_percentage: global.fee_percentage,
     });
 
     Ok(())

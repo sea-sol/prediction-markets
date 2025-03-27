@@ -10,6 +10,7 @@ pub struct Global {
     pub betting_user_fee_amount: u64,
     pub decimal: u8,
     pub market_count: u64,
+    pub fee_percentage: u8,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -20,4 +21,5 @@ pub struct GlobalParams {
     pub betting_user_fee_amount: u64,
     pub market_count: u64,
     pub decimal: u8,
+    pub fee_percentage: u8,
 }
