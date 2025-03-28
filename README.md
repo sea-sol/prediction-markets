@@ -17,7 +17,7 @@ This is a **Solana-based Prediction Market Smart Contract** built using the **An
 ---
 
 ## 📜 Smart Contract Architecture
-### 1️⃣ Gobal setting
+### 1️⃣ Initial preparation
 ```typescript
 const tx = await program.methods.initialize({
       feeAuthority: feeAuthority,
