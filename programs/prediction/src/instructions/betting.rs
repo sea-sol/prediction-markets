@@ -121,7 +121,7 @@ impl Betting<'_> {
             .ok_or(ContractError::ArithmeticError)?
             .checked_div(100)
             .ok_or(ContractError::ArithmeticError)?;
-        msg!("🎫token_amount to user 🎫 {}", fee_amount_to_auth);
+        msg!("🎫fee_amount_to_auth 🎫 {}", fee_amount_to_auth);
     
         let transfer_auth_instruction = solana_program::system_instruction::transfer(
             ctx.accounts.user.key,
@@ -140,7 +140,7 @@ impl Betting<'_> {
         )?;
 
         // Transfer fee to creator
-        msg!("🎫token_amount to user 🎫 {}", ctx.accounts
+        msg!("🎫fee_amount_to_creator 🎫 {}", ctx.accounts
         .global
         .betting_user_fee_amount
         .checked_sub(fee_amount_to_auth)
