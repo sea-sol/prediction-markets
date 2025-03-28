@@ -195,16 +195,22 @@ anchor deploy
 
 ## 📝 Example Usage
 ### 1️⃣ Create a Market
-\`\`\`rust
-anchor test --filter create_market
+\`\`\`update seed on const file
+```typescript
+export const GLOBAL_SEED = "global_7";
+export const MARKET_SEED = "market_7";
+export const MINT_SEED_A = "mint_a_7";
+export const MINT_SEED_B = "mint_b_7";
+```
+```rust
+pub const GLOBAL_SEED: &'static str = "global_7";
+pub const MARKET_SEED: &'static str = "market_7";
+pub const MINT_SEED_A: &'static str = "mint_a_7";
+pub const MINT_SEED_B: &'static str = "mint_b_7";
+```
 \`\`\`
-### 2️⃣ Place a Bet
+### 2️⃣ Run test
 \`\`\`rust
-anchor test --filter place_bet
-\`\`\`
-### 3️⃣ Resolve Market
-\`\`\`rust
-anchor test --filter resolve_market
-\`\`\`
+anchor test
 
 ---
