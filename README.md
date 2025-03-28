@@ -29,6 +29,21 @@ const tx = await program.methods.initialize({
       systemProgram: SystemProgram.programId,
     }).signers([owner]).rpc();
 ```
+```rust
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    #[account(
+        init, 
+        payer = payer, 
+        space = 8 + Global::INIT_SPACE, 
+        seeds = [GLOBAL_SEED.as_bytes()], 
+        bump
+    )]
+    pub global: Account<'info, Global>,
+    pub system_program: Program<'info, System>,
+}
+```
 ### 2️⃣ Trading Mechanism
 - Users can buy or sell **Yes/No** tokens  
 - Prices are determined based on market supply and demand  
