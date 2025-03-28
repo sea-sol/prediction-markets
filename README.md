@@ -23,11 +23,11 @@ const tx = await program.methods.initialize({
       marketCount: new BN(0.1 * 10 ** 9),
       decimal: 9,
       feePercentage: 10,
-    }).accounts({
+}).accounts({
       global,
       payer: owner.publicKey,
       systemProgram: SystemProgram.programId,
-    }).signers([owner]).rpc();
+}).signers([owner]).rpc();
 ```
 ```rust
 pub struct Initialize<'info> {
