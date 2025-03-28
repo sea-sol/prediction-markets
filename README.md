@@ -210,7 +210,7 @@ pub const MINT_SEED_B: &'static str = "mint_b_7";
 ```
 \`\`\`
 ### 2️⃣ Run test
-\`\`\`rust
+```
 anchor test
-
+```
 ---
