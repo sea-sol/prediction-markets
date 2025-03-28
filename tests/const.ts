@@ -1,9 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 
-export const GLOBAL_SEED = "global_5";
-export const MARKET_SEED = "market_5";
-export const MINT_SEED_A = "mint_a_5";
-export const MINT_SEED_B = "mint_b_5";
+export const GLOBAL_SEED = "global_7";
+export const MARKET_SEED = "market_7";
+export const MINT_SEED_A = "mint_a_7";
+export const MINT_SEED_B = "mint_b_7";
 
 export const PREDICTION_ID = new PublicKey("Da4udDYBTFUrdCjRkstWMMpxQdPi6pkq7CXicSUNZA2u");
 export const SOL_USDC_FEED = "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR";

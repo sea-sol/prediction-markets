@@ -47,164 +47,152 @@ describe("prediction", () => {
 
   });
   
-  // it("Is initialized!", async () => {
-  //   const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
-  //   console.log("global ====>", global);
+  it("Is initialized!", async () => {
+    const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
+    console.log("global ====>", global);
 
-  //   // Add your test here.
-  //   const tx = await program.methods.initialize({
-  //     feeAuthority: feeAuthority,
-  //     creatorFeeAmount: new BN(0.001 * 10 ** 9),
-  //     liqudityUserFeeAmount: new BN(0.001 * 10 ** 9),
-  //     bettingUserFeeAmount: new BN(0.001 * 10 ** 9),
-  //     marketCount: new BN(0.1 * 10 ** 9),
-  //     decimal: 9,
-  //     feePercentage: 10,
-  //   }).accounts({
-  //     global,
-  //     payer: owner.publicKey,
-  //     systemProgram: SystemProgram.programId,
-  //   }).signers([owner]).rpc();
-  //   console.log("🤖Your transaction signature 🤖", tx);
-  //   const globalAccount = await program.account.global.fetch(global);
-  //   console.log("🎫globalAccount  🎫", globalAccount);
-  // });
+    // Add your test here.
+    const tx = await program.methods.initialize({
+      feeAuthority: feeAuthority,
+      creatorFeeAmount: new BN(0.001 * 10 ** 9),
+      liqudityUserFeeAmount: new BN(0.001 * 10 ** 9),
+      bettingUserFeeAmount: new BN(0.001 * 10 ** 9),
+      marketCount: new BN(0.1 * 10 ** 9),
+      decimal: 9,
+      feePercentage: 10,
+    }).accounts({
+      global,
+      payer: owner.publicKey,
+      systemProgram: SystemProgram.programId,
+    }).signers([owner]).rpc();
+    console.log("🤖Your transaction signature 🤖", tx);
+    const globalAccount = await program.account.global.fetch(global);
+    console.log("🎫globalAccount  🎫", globalAccount);
+  });
 
-  // it("Get oracle res", async () => {
+  it("Create market", async () => {
+    const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
+    console.log("global in creating market ====>", global);
+    const globalAccount = await program.account.global.fetch(global);
+    console.log("🎫globalAccount in creating market  🎫", globalAccount);
 
-  //   const tx = await program.methods.getRes().accounts({
-  //     user: owner.publicKey,
-  //     feedAggregator: new PublicKey(SOL_USDC_FEED),
-  //     feed: new PublicKey("5mXfTYitRFsWPhdJfp2fc8N6hK8cw6NB5jAYpronQasj"),
-  //     systemProgram: SystemProgram.programId,
-  //   }).signers([owner]).rpc();
-
-  //   console.log("🤖Your transaction signature  🤖", tx);
-  // });
-
-  // it("Create market", async () => {
-  //   const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
-  //   console.log("global in creating market ====>", global);
-  //   const globalAccount = await program.account.global.fetch(global);
-  //   console.log("🎫globalAccount in creating market  🎫", globalAccount);
-
-  //   let pdaTokenAAccount = await getAssociatedTokenAccount(market, tokenA);
-  //   let pdaTokenBAccount = await getAssociatedTokenAccount(market, tokenB);
-  //   console.log("pdaTokenAAccount ====>", pdaTokenAAccount);
-  //   console.log("pdaTokenBAccount ====>", pdaTokenBAccount);
-  //   const metadata_a = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(METADATA_SEED),
-  //       TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-  //       tokenA.toBuffer(),
-  //     ],
-  //     TOKEN_METADATA_PROGRAM_ID
-  //   )[0];
-  //   const metadata_b = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(METADATA_SEED),
-  //       TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-  //       tokenB.toBuffer(),
-  //     ],
-  //     TOKEN_METADATA_PROGRAM_ID
-  //   )[0];
+    let pdaTokenAAccount = await getAssociatedTokenAccount(market, tokenA);
+    let pdaTokenBAccount = await getAssociatedTokenAccount(market, tokenB);
+    console.log("pdaTokenAAccount ====>", pdaTokenAAccount);
+    console.log("pdaTokenBAccount ====>", pdaTokenBAccount);
+    const metadata_a = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(METADATA_SEED),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        tokenA.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    )[0];
+    const metadata_b = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(METADATA_SEED),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        tokenB.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    )[0];
     
-  //   // Create market //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //   const tx = await program.methods.initMarket({
-  //     quest: 190,
-  //     tokenAmount: new BN(tokenAAmount),
-  //     tokenPrice: new BN(0.00005 * 10 ** 9),
-  //     nameA: "tokenA",
-  //     nameB: "tokenB",
-  //     symbolA: "tokenA",
-  //     symbolB: "tokenB",
-  //     urlA: "https://tokenA.com",
-  //     urlB: "https://tokenB.com",
-  //   }).accounts({
-  //     user: owner.publicKey,
-  //     feeAuthority: feeAuthority,
-  //     market,
-  //     global,
-  //     feed: new PublicKey("5mXfTYitRFsWPhdJfp2fc8N6hK8cw6NB5jAYpronQasj"),
-  //     metadataA: metadata_a,
-  //     metadataB: metadata_b,
-  //     tokenMintA: tokenA,
-  //     tokenMintB: tokenB,
-  //     // pdaTokenAAccount,
-  //     // pdaTokenBAccount,
-  //     tokenProgram: TOKEN_PROGRAM_ID,
-  //     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-  //     tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-  //     rent: SYSVAR_RENT_PUBKEY,
-  //     systemProgram: SystemProgram.programId,
-  //   }).transaction();
+    // Create market //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const tx = await program.methods.initMarket({
+      quest: 190,
+      tokenAmount: new BN(tokenAAmount),
+      tokenPrice: new BN(0.00005 * 10 ** 9),
+      nameA: "tokenA",
+      nameB: "tokenB",
+      symbolA: "tokenA",
+      symbolB: "tokenB",
+      urlA: "https://tokenA.com",
+      urlB: "https://tokenB.com",
+    }).accounts({
+      user: owner.publicKey,
+      feeAuthority: feeAuthority,
+      market,
+      global,
+      feed: new PublicKey("5mXfTYitRFsWPhdJfp2fc8N6hK8cw6NB5jAYpronQasj"),
+      metadataA: metadata_a,
+      metadataB: metadata_b,
+      tokenMintA: tokenA,
+      tokenMintB: tokenB,
+      // pdaTokenAAccount,
+      // pdaTokenBAccount,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+      rent: SYSVAR_RENT_PUBKEY,
+      systemProgram: SystemProgram.programId,
+    }).transaction();
 
-  //   const mintTx = await program.methods.mintToken().accounts({
-  //     pdaTokenAAccount,
-  //     pdaTokenBAccount,
-  //     user: owner.publicKey,
-  //     feeAuthority: feeAuthority,
-  //     market,
-  //     global,
-  //     metadataA: metadata_a,
-  //     metadataB: metadata_b,
-  //     tokenMintA: tokenA,
-  //     tokenMintB: tokenB,
-  //     tokenProgram: TOKEN_PROGRAM_ID,
-  //     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-  //     tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-  //     rent: SYSVAR_RENT_PUBKEY,
-  //     systemProgram: SystemProgram.programId,
-  //   }).transaction();
+    const mintTx = await program.methods.mintToken().accounts({
+      pdaTokenAAccount,
+      pdaTokenBAccount,
+      user: owner.publicKey,
+      feeAuthority: feeAuthority,
+      market,
+      global,
+      metadataA: metadata_a,
+      metadataB: metadata_b,
+      tokenMintA: tokenA,
+      tokenMintB: tokenB,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+      rent: SYSVAR_RENT_PUBKEY,
+      systemProgram: SystemProgram.programId,
+    }).transaction();
 
-  //   const creatTx = new Transaction();
-  //   creatTx.add(tx);
-  //   creatTx.add(mintTx);
-  //   creatTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-  //   creatTx.feePayer = owner.publicKey;
+    const creatTx = new Transaction();
+    creatTx.add(tx);
+    creatTx.add(mintTx);
+    creatTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    creatTx.feePayer = owner.publicKey;
 
-  //   const preInxSim = await connection.simulateTransaction(creatTx);
-  //   console.log("🎫create market preInxSim 🎫", preInxSim);
+    const preInxSim = await connection.simulateTransaction(creatTx);
+    console.log("🎫create market preInxSim 🎫", preInxSim);
 
-  //   const sig = await connection.sendTransaction(creatTx, [owner], {
-  //     skipPreflight: true,
-  //   });
+    const sig = await connection.sendTransaction(creatTx, [owner], {
+      skipPreflight: true,
+    });
 
-  //   const confirm = await connection.confirmTransaction(sig, "confirmed");
-  //   console.log("🤖create market transaction signature 🤖", sig);
-  //   // End of Create market //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // });
+    const confirm = await connection.confirmTransaction(sig, "confirmed");
+    console.log("🤖create market transaction signature 🤖", sig);
+    // End of Create market //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  });
 
-  // it("Deposit liquidity", async () => {
-  //   const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
-  //   console.log("global in creating market ====>", global);
-  //   const market = PublicKey.findProgramAddressSync([Buffer.from(MARKET_SEED), owner.publicKey.toBuffer()], PREDICTION_ID)[0];
+  it("Deposit liquidity", async () => {
+    const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
+    console.log("global in creating market ====>", global);
+    const market = PublicKey.findProgramAddressSync([Buffer.from(MARKET_SEED), owner.publicKey.toBuffer()], PREDICTION_ID)[0];
 
-  //   let tx = await program.methods.addLiquidity(new BN(0.1 * 10 ** 9))
-  //   .accounts({
-  //     user: owner.publicKey,
-  //     creator: owner.publicKey,
-  //     feeAuthority: feeAuthority,
-  //     market,
-  //     global,
-  //     systemProgram: SystemProgram.programId,
-  //   }).transaction();
+    let tx = await program.methods.addLiquidity(new BN(0.1 * 10 ** 9))
+    .accounts({
+      user: owner.publicKey,
+      creator: owner.publicKey,
+      feeAuthority: feeAuthority,
+      market,
+      global,
+      systemProgram: SystemProgram.programId,
+    }).transaction();
 
-  //   const creatTx = new Transaction();
-  //   creatTx.add(tx);
-  //   creatTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-  //   creatTx.feePayer = owner.publicKey;
+    const creatTx = new Transaction();
+    creatTx.add(tx);
+    creatTx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    creatTx.feePayer = owner.publicKey;
 
-  //   const preInxSim = await connection.simulateTransaction(creatTx);
-  //   console.log("🎫deposit liquidity preInxSim 🎫", preInxSim);
+    const preInxSim = await connection.simulateTransaction(creatTx);
+    console.log("🎫deposit liquidity preInxSim 🎫", preInxSim);
 
-  //   const sig = await connection.sendTransaction(creatTx, [owner], {
-  //     skipPreflight: true,
-  //   });
+    const sig = await connection.sendTransaction(creatTx, [owner], {
+      skipPreflight: true,
+    });
 
-  //   const confirm = await connection.confirmTransaction(sig, "confirmed");
-  //   console.log("🤖deposit liquidity transaction signature 🤖", sig);
-  // });
+    const confirm = await connection.confirmTransaction(sig, "confirmed");
+    console.log("🤖deposit liquidity transaction signature 🤖", sig);
+  });
   
   it("It is betting", async () => {
     const global = PublicKey.findProgramAddressSync([Buffer.from(GLOBAL_SEED)], PREDICTION_ID)[0];
@@ -252,4 +240,19 @@ describe("prediction", () => {
     const confirm = await connection.confirmTransaction(sig, "confirmed");
     console.log("🤖Add liquidity transaction signature 🤖", sig);
   });
+
+  it("Get oracle res", async () => {
+    const market = PublicKey.findProgramAddressSync([Buffer.from(MARKET_SEED), owner.publicKey.toBuffer()], PREDICTION_ID)[0];
+
+    const tx = await program.methods.getRes().accounts({
+      user: owner.publicKey,
+      market,
+      feedAggregator: new PublicKey(SOL_USDC_FEED),
+      feed: new PublicKey("5mXfTYitRFsWPhdJfp2fc8N6hK8cw6NB5jAYpronQasj"),
+      systemProgram: SystemProgram.programId,
+    }).signers([owner]).rpc();
+
+    console.log("🤖Your transaction signature  🤖", tx);
+  });
+
 });
