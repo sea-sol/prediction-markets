@@ -5,9 +5,13 @@ This is a **Solana-based Prediction Market Smart Contract** built using the **An
 
 ## 🚀 Features
 ✅ **Decentralized Prediction Market** – Users can create their own market.
+
 ✅ **Deposite liquidity** – Users can deposite sol before start betting and once the liqudity amount reaches special amount they can start betting "Yes" and "No".
+
 ✅ **Betting** – Trade "Yes" and "No" tokens based on expected outcomes. Users can purchase "Yes" or "No" tokens based on their predictions, with token prices fluctuating dynamically according to probability. This probability is determined by the total number of tokens sold to users, ensuring a market-driven pricing mechanism.
+
 ✅ **Automated Settlement** – Resolves markets based on real-world data  
+
 ✅ **Switchboard Oracle Integration** – Fetches external data for outcome validation  
 
 ---
