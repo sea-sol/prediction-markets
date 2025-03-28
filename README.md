@@ -45,6 +45,10 @@ pub struct Initialize<'info> {
 }
 ```
 ### 2️⃣ Market creation
+- Create Market PDA
+- Setup initial options for "Yes" and "No" token and prodiction quest
+- Mint new token for "Yes" and "No" token
+
 ```typescript
 const tx = await program.methods.initMarket({
       quest: 190,
