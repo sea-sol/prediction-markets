@@ -1,29 +1,21 @@
-use crate::constants::{
-    MARKET_SEED, GLOBAL_SEED, MINT_SEED_A, MINT_SEED_B,
-};
-use crate::states::{
-    market::*, global::*,
-};
-use anchor_lang::{
-    prelude::*, solana_program,
-};
+use crate::constants::{GLOBAL_SEED, MARKET_SEED, MINT_SEED_A, MINT_SEED_B};
+use crate::errors::ContractError;
 use crate::events::MarketCreated;
+use crate::states::{global::*, market::*};
+use anchor_lang::{prelude::*, solana_program};
 use anchor_spl::{
     metadata::{
-        create_metadata_accounts_v3, mpl_token_metadata::types::DataV2, CreateMetadataAccountsV3, 
+        create_metadata_accounts_v3, mpl_token_metadata::types::DataV2, CreateMetadataAccountsV3,
     },
-    token::{
-        Mint, TokenAccount, mint_to, MintTo, Token,
-    },
+    token::{Mint, Token},
 };
-use crate::errors::ContractError;
 
 #[derive(Accounts)]
 #[instruction(params: MarketParams)]
 pub struct CreateMarket<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
-    
+
     /// CHECK: global fee authority is checked in constraint
     #[account(
         mut,
@@ -32,14 +24,14 @@ pub struct CreateMarket<'info> {
     pub fee_authority: AccountInfo<'info>,
 
     #[account(
-        init, 
-        payer = user, 
-        space = 8 + Market::INIT_SPACE, 
-        seeds = [MARKET_SEED.as_bytes(), user.key().as_ref()], 
+        init,
+        payer = user,
+        space = 8 + Market::INIT_SPACE,
+        seeds = [MARKET_SEED.as_bytes(), user.key().as_ref()],
         bump
     )]
+    /// CHECK: global fee authority is checked in constraint
     pub market: Box<Account<'info, Market>>,
-    
     #[account(
         seeds = [GLOBAL_SEED.as_bytes()],
         bump
@@ -47,11 +39,15 @@ pub struct CreateMarket<'info> {
     pub global: Box<Account<'info, Global>>,
     /// CHECK: via switchboard sdk
     pub feed: AccountInfo<'info>,
-    
-    #[account(mut)]
+
     ///CHECK: Using seed to validate metadata account
-    metadata: UncheckedAccount<'info>,
-    
+    #[account(mut)]
+    metadata_a: UncheckedAccount<'info>,
+
+    ///CHECK: Using seed to validate metadata account
+    #[account(mut)]
+    metadata_b: UncheckedAccount<'info>,
+
     #[account(
         init,
         seeds = [MINT_SEED_A.as_bytes(), market.key().as_ref()],
@@ -70,35 +66,7 @@ pub struct CreateMarket<'info> {
         mint::authority = market
     )]
     token_mint_b: Box<Account<'info, Mint>>,
-    
-    #[account(
-        init_if_needed,
-        payer = user,
-        associated_token::mint = token_mint_a,
-        associated_token::authority = market
-    )]
-    pub pda_token_a_account: Box<Account<'info, TokenAccount>>,
-    #[account(
-        init_if_needed,
-        payer = user,
-        associated_token::mint = token_mint_b,
-        associated_token::authority = market
-    )]
-    pub pda_token_b_account: Box<Account<'info, TokenAccount>>,
 
-    // #[account(
-    //     mut, 
-    //     associated_token::mint = token_mint_a,
-    //     associated_token::authority = user.key()
-    // )]
-    // pub user_token_a_account: Box<Account<'info, TokenAccount>>,
-    // #[account(
-    //     mut, 
-    //     associated_token::mint = token_mint_b,
-    //     associated_token::authority = user.key()
-    // )]
-    // pub user_token_b_account: Box<Account<'info, TokenAccount>>,
-    
     pub token_program: Program<'info, Token>,
     /// CHECK: associated token program account
     pub associated_token_program: UncheckedAccount<'info>,
@@ -111,35 +79,23 @@ pub struct CreateMarket<'info> {
 
 impl CreateMarket<'_> {
     pub fn create_market(ctx: Context<CreateMarket>, params: MarketParams) -> Result<()> {
-        let decimal_multiplier = 10u64.pow(ctx.accounts.global.decimal as u32);
-        let token_a_amount = params
-            .token_a_amount
-            .checked_mul(decimal_multiplier)
-            .ok_or(ContractError::ArithmeticError)?;
-        let token_b_amount = params
-            .token_b_amount
-            .checked_mul(decimal_multiplier)
-            .ok_or(ContractError::ArithmeticError)?;
-
         // update market settings
-        ctx.accounts.market.update_market_settings(
+        let _ = ctx.accounts.market.update_market_settings(
             params.quest,
             ctx.accounts.user.key(),
             ctx.accounts.feed.key(),
             ctx.accounts.token_mint_a.key(),
             ctx.accounts.token_mint_b.key(),
-            token_a_amount,
-            token_b_amount,
-            params.token_price_a,
-            params.token_price_b,
+            params.token_amount,
+            params.token_price,
         );
 
-        let binding = ctx.accounts.market.key();
-        let mint_authority_signer: [&[u8]; 3] =
-            Market::get_signer(&ctx.bumps.market, &binding);
+        let binding = ctx.accounts.user.key();
+        let mint_authority_signer: [&[u8]; 3] = Market::get_signer(&ctx.bumps.market, &binding);
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
-        
-        // initialize metadata and mint "Yes" token to market
+
+        msg!("🎫here metadata creation 🎫");
+        // initialize Yes token metadata
         ctx.accounts.intialize_meta(
             params.name_a,
             true,
@@ -147,74 +103,34 @@ impl CreateMarket<'_> {
             params.url_a,
             mint_auth_signer_seeds,
         )?;
+        msg!("🎫here metadata creation 2 🎫");
 
-        mint_to(
-            CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
-                MintTo {
-                    authority: ctx.accounts.market.to_account_info().clone(),
-                    to: ctx.accounts.pda_token_a_account.to_account_info(),
-                    mint: ctx.accounts.token_mint_a.to_account_info().clone(),
-                },
-                mint_auth_signer_seeds,
-            ),
-            token_a_amount,
-        )?;
-
-        // initialize metadata and mint "No" token to market    
+        // initialize No token metadata
         ctx.accounts.intialize_meta(
             params.name_b,
             false,
             params.symbol_b,
             params.url_b,
             mint_auth_signer_seeds,
-        )?;     
-
-        mint_to(
-            CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
-                MintTo {
-                    authority: ctx.accounts.market.to_account_info().clone(),
-                    to: ctx.accounts.pda_token_b_account.to_account_info(),
-                    mint: ctx.accounts.token_mint_b.to_account_info().clone(),
-                },
-                mint_auth_signer_seeds,
-            ),
-            token_b_amount,
         )?;
 
         // Transfer creator fee to fee authority
-        let transfer_instruction =
-        solana_program::system_instruction::transfer(ctx.accounts.user.key, ctx.accounts.fee_authority.key, ctx.accounts.global.creator_fee_amount);
+        let transfer_instruction = solana_program::system_instruction::transfer(
+            ctx.accounts.user.key,
+            ctx.accounts.fee_authority.key,
+            ctx.accounts.global.creator_fee_amount,
+        );
 
         // Invoke the transfer instruction
         anchor_lang::solana_program::program::invoke_signed(
             &transfer_instruction,
-            &[ctx.accounts.user.to_account_info(), ctx.accounts.fee_authority.to_account_info(), ctx.accounts.system_program.to_account_info()],
+            &[
+                ctx.accounts.user.to_account_info(),
+                ctx.accounts.fee_authority.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
             &[],
         )?;
-
-        ctx.accounts.market.update_market_status(MarketStatus::Prepare);
-        // // Transfer token a and token b from user to market
-        // let cpi_ctx_a: CpiContext<_> = CpiContext::new(
-        //     ctx.accounts.token_program.to_account_info(),
-        //     Transfer {
-        //         from: ctx.accounts.user_token_a_account.to_account_info(),
-        //         authority: ctx.accounts.user.to_account_info(),
-        //         to: ctx.accounts.pda_token_a_account.to_account_info(),
-        //     },
-        // );
-        // transfer(cpi_ctx_a, params.token_a_amount)?;
-
-        // let cpi_ctx_b: CpiContext<_> = CpiContext::new(
-        //     ctx.accounts.token_program.to_account_info(),
-        //     Transfer {
-        //         from: ctx.accounts.user_token_b_account.to_account_info(),
-        //         authority: ctx.accounts.user.to_account_info(),
-        //         to: ctx.accounts.pda_token_b_account.to_account_info(),
-        //     },
-        // );
-        // transfer(cpi_ctx_b, params.token_b_amount)?;
 
         emit!(MarketCreated {
             market_id: ctx.accounts.market.key(),
@@ -228,7 +144,8 @@ impl CreateMarket<'_> {
             token_b_amount: ctx.accounts.market.token_b_amount,
             token_price_a: ctx.accounts.market.token_price_a,
             token_price_b: ctx.accounts.market.token_price_b,
-        }); 
+            total_reserve: ctx.accounts.market.total_reserve,
+        });
 
         Ok(())
     }
@@ -246,14 +163,18 @@ impl CreateMarket<'_> {
         } else {
             mint_info = self.token_mint_b.to_account_info();
         }
-        
+
         let mint_authority_info = self.market.to_account_info();
-        let metadata_info = self.metadata.to_account_info();
-    
+        let metadata_info = if is_token_a {
+            self.metadata_a.to_account_info()
+        } else {
+            self.metadata_b.to_account_info()
+        };
+
         let mut para_name: String = "".to_string();
         let mut para_symbol: String = "".to_string();
         let mut para_uri: String = "".to_string();
-    
+
         if let Some(name) = name {
             para_name = name.to_string();
         }
@@ -263,7 +184,7 @@ impl CreateMarket<'_> {
         if let Some(uri) = uri {
             para_uri = uri.to_string();
         }
-    
+
         let token_data: DataV2 = DataV2 {
             name: para_name.clone(),
             symbol: para_symbol.clone(),

@@ -79,7 +79,15 @@ pub fn deposit_liquidity(ctx: Context<DepositLiquidity>, amount: u64) -> Result<
     if market_balance >= ctx.accounts.global.market_count {
         ctx.accounts.market.market_status = MarketStatus::Active;
     }
-
+    msg!("🎫deposit liquidity market_balance 🎫 {}", market_balance);
+    msg!(
+        "🎫deposit liquidity global.market_count 🎫 {}",
+        ctx.accounts.global.market_count
+    );
+    msg!(
+        "🎫deposit liquidity market_status 🎫 {:?}",
+        ctx.accounts.market.market_status
+    );
     emit!(MarketStatusUpdated {
         market_id: ctx.accounts.market.key(),
         market_status: ctx.accounts.market.market_status,

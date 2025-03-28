@@ -2,7 +2,7 @@ use crate::constants::{GLOBAL_SEED, MARKET_SEED};
 use crate::errors::ContractError;
 use crate::states::{global::*, market::*};
 use anchor_lang::{prelude::*, solana_program};
-use anchor_spl::token::{Mint, TokenAccount};
+use anchor_spl::token::{Mint, TokenAccount, Token};
 use crate::utils::token_transfer;
 
 #[derive(Accounts)]
@@ -50,6 +50,11 @@ pub struct Betting<'info> {
         bump
     )]
     pub global: Account<'info, Global>,
+    pub token_program: Program<'info, Token>,
+     /// CHECK: associated token program account
+     pub associated_token_program: UncheckedAccount<'info>,
+     /// CHECK: token metadata program account
+     pub token_metadata_program: UncheckedAccount<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -57,26 +62,45 @@ pub struct Betting<'info> {
 impl Betting<'_> {
     pub fn betting(ctx: Context<Betting>, params: BettingParams) -> Result<()> {
         let market = &mut ctx.accounts.market;
-        let global = &mut ctx.accounts.global;
 
-        if params.is_yes {
-            market.yes_amount += 1;
-        } else {
-            market.no_amount += 1;
-        }
-
+        let decimal_multiplier = 10u64.pow(ctx.accounts.global.decimal as u32);
+        
         // Transfer sol to market
+        let token_price = if params.is_yes {
+            market.token_price_a
+        } else {
+            market.token_price_b
+        };
+
+        let sol_to_buy = params.amount.checked_mul(decimal_multiplier).ok_or(ContractError::ArithmeticError)?.checked_div(10u64.pow(9)).ok_or(ContractError::ArithmeticError)?.checked_mul(token_price).ok_or(ContractError::ArithmeticError)?;
+        msg!("🎫sol_to_buy 🎫 {}", sol_to_buy);
         let transfer_market_instruction = solana_program::system_instruction::transfer(
             ctx.accounts.user.key,
             market.to_account_info().key,
-            params.amount,
+            sol_to_buy,
         );
 
-        // Transfer token to market
-        let binding = market.key();
+        anchor_lang::solana_program::program::invoke_signed(
+            &transfer_market_instruction,
+            &[
+                    ctx.accounts.user.to_account_info(),
+                    market.to_account_info(),
+                    ctx.accounts.system_program.to_account_info(),
+                ],
+                &[],
+            )?;
+            
+        // Transfer token to user
+        let binding = ctx.accounts.creator.key();
         let mint_authority_signer: [&[u8]; 3] =
             Market::get_signer(&ctx.bumps.market, &binding);
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
+
+        let token_amount = params
+            .amount
+            .checked_mul(decimal_multiplier)
+            .ok_or(ContractError::ArithmeticError)?;
+        msg!("🎫token_amount to user 🎫 {}", token_amount);
 
         token_transfer(
             ctx.accounts.pda_token_account.to_account_info(),
@@ -84,21 +108,11 @@ impl Betting<'_> {
             market.to_account_info(),
             ctx.accounts.token_mint.to_account_info(),
             mint_auth_signer_seeds,
-            params.amount,
+            token_amount,
         )?;
-
-        // Invoke the transfer instruction
-        anchor_lang::solana_program::program::invoke_signed(
-            &transfer_market_instruction,
-            &[
-                ctx.accounts.user.to_account_info(),
-                market.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-            ],
-            &[],
-        )?;
-
-        // Transfer fee to fee authority and creator
+            
+        // Transfer fee to fee authority
+        
         let fee_amount_to_auth = ctx
             .accounts
             .global
@@ -107,14 +121,14 @@ impl Betting<'_> {
             .ok_or(ContractError::ArithmeticError)?
             .checked_div(100)
             .ok_or(ContractError::ArithmeticError)?;
-
+        msg!("🎫token_amount to user 🎫 {}", fee_amount_to_auth);
+    
         let transfer_auth_instruction = solana_program::system_instruction::transfer(
             ctx.accounts.user.key,
             ctx.accounts.fee_authority.key,
             fee_amount_to_auth,
         );
 
-        // Invoke the transfer instruction
         anchor_lang::solana_program::program::invoke_signed(
             &transfer_auth_instruction,
             &[
@@ -125,6 +139,13 @@ impl Betting<'_> {
             &[],
         )?;
 
+        // Transfer fee to creator
+        msg!("🎫token_amount to user 🎫 {}", ctx.accounts
+        .global
+        .betting_user_fee_amount
+        .checked_sub(fee_amount_to_auth)
+        .ok_or(ContractError::ArithmeticError)?);
+
         let transfer_creator_instruction = solana_program::system_instruction::transfer(
             ctx.accounts.user.key,
             ctx.accounts.creator.key,
@@ -132,10 +153,9 @@ impl Betting<'_> {
                 .global
                 .betting_user_fee_amount
                 .checked_sub(fee_amount_to_auth)
-                .unwrap(),
+                .ok_or(ContractError::ArithmeticError)?,
         );
 
-        // Invoke the transfer instruction
         anchor_lang::solana_program::program::invoke_signed(
             &transfer_creator_instruction,
             &[
@@ -146,6 +166,13 @@ impl Betting<'_> {
             &[],
         )?;
 
+        if params.is_yes {
+            market.yes_amount += 1;
+        } else {
+            market.no_amount += 1;
+        }
+
+        let _ = market.set_token_price(params.amount, params.is_yes)?;
         Ok(())
     }
 }

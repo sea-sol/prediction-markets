@@ -22,12 +22,12 @@ pub fn get_oracle_res(ctx: Context<GetOracleRes>) -> Result<()> {
     let feed = &ctx.accounts.feed_aggregator.load()?;
     let current_sol_price: f64 = feed.get_result()?.try_into()?;
 
-    msg!("Current SOL/USD price: {}", current_sol_price);
+    msg!("🎫Current SOL/USD price 🎫{}", current_sol_price);
 
     let feed_account = ctx.accounts.feed.data.borrow();
     let feed: std::cell::Ref<'_, PullFeedAccountData> =
         PullFeedAccountData::parse(feed_account).unwrap();
-    msg!("price: {:?}", feed.value());
+    msg!("🎫price 🎫 {:?}", feed.value());
     emit!(OracleResUpdated {
         oracle_res: feed.value().unwrap().try_into().unwrap(),
     });

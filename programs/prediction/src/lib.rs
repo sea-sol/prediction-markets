@@ -7,14 +7,14 @@ pub mod states;
 pub mod utils;
 
 use instructions::{
-    betting::*, create_market::*, deposite_liquidity::*, get_oracle_res::*, init::*,
+    betting::*, create_market::*, deposite_liquidity::*, get_oracle_res::*, init::*, token_mint::*,
 };
 use states::{
     global::GlobalParams,
     market::{BettingParams, MarketParams},
 };
 
-declare_id!("FW9KvGkRcnibqm5LSE4J8sq3homgVizKGBoNA511gR2s");
+declare_id!("Da4udDYBTFUrdCjRkstWMMpxQdPi6pkq7CXicSUNZA2u");
 
 #[program]
 pub mod prediction {
@@ -38,5 +38,9 @@ pub mod prediction {
 
     pub fn create_bet(ctx: Context<Betting>, params: BettingParams) -> Result<()> {
         Betting::betting(ctx, params)
+    }
+
+    pub fn mint_token(ctx: Context<TokenMint>) -> Result<()> {
+        TokenMint::token_mint(ctx)
     }
 }

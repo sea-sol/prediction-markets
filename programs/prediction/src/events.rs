@@ -30,6 +30,7 @@ pub struct MarketCreated {
     pub token_b_amount: u64,
     pub token_price_a: u64,
     pub token_price_b: u64,
+    pub total_reserve: u64,
 }
 
 #[event]
