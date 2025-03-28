@@ -117,6 +117,31 @@ if market_balance >= ctx.accounts.global.market_count {
   ctx.accounts.market.market_status = MarketStatus::Active;
 }
 ```
+### 4️⃣ Betting on Market
+- Users buy token "Yes" or "No" Token
+```typescript
+
+    const tx = await program.methods.createBet({
+      amount: new BN(10000),
+      isYes: true,
+    }).accounts({
+      user: owner.publicKey,
+      creator: owner.publicKey,
+      tokenMint: tokenA,
+      pdaTokenAccount: pdaTokenAAccount,
+      userTokenAccount: userTokenAAccount,
+      feeAuthority: feeAuthority,
+      market,
+      global,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+    }).transaction();
+```
+- Prices of both token will be changed ans flowing token amount.
+  ![image](https://github.com/user-attachments/assets/491b4397-6a30-4c95-a3b7-2c45f5fdfe7c)
+
 ---
 
 ## 🛠 Installation & Setup
