@@ -92,11 +92,27 @@ pub fn set_token_price(&mut self, sell_token_amount: u64, is_yes: bool) -> Resul
         Ok(())
     }
 ```
-### 3️⃣ Market Resolution
-- Switchboard Oracle fetches real-world data  
-- The contract determines the winning outcome  
-- Winning tokens are redeemable for rewards  
-
+### 3️⃣ Liqudity Deposite
+- Users can deposite sol to market which is already created
+```typescript
+ let tx = await program.methods.addLiquidity(new BN(0.1 * 10 ** 9))
+    .accounts({
+      user: owner.publicKey,
+      creator: owner.publicKey,
+      feeAuthority: feeAuthority,
+      market,
+      global,
+      systemProgram: SystemProgram.programId,
+    }).transaction();
+...
+```
+- Once sol amount reaches specific value it changes market status. So users can start betting.
+```rust
+let market_balance = ctx.accounts.market.get_lamports();
+if market_balance >= ctx.accounts.global.market_count {
+  ctx.accounts.market.market_status = MarketStatus::Active;
+}
+```
 ---
 
 ## 🛠 Installation & Setup
