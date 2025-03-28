@@ -14,8 +14,20 @@ This is a **Solana-based Prediction Market Smart Contract** built using the **An
 
 ## 📜 Smart Contract Architecture
 ### 1️⃣ Gobal setting
-- Admin or users create a new market with predefined outcomes  
-- Two SPL tokens (\`Yes\` and \`No\`) are minted  
+```typescript
+const tx = await program.methods.initialize({
+      feeAuthority: feeAuthority,
+      creatorFeeAmount: new BN(0.001 * 10 ** 9),
+      liqudityUserFeeAmount: new BN(0.001 * 10 ** 9),
+      bettingUserFeeAmount: new BN(0.001 * 10 ** 9),
+      marketCount: new BN(0.1 * 10 ** 9),
+      decimal: 9,
+      feePercentage: 10,
+    }).accounts({
+      global,
+      payer: owner.publicKey,
+      systemProgram: SystemProgram.programId,
+    }).signers([owner]).rpc();
 
 ### 2️⃣ Trading Mechanism
 - Users can buy or sell **Yes/No** tokens  
