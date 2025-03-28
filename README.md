@@ -66,7 +66,32 @@ const tx = await program.methods.initMarket({
       market,
 ...
 ```
+- Calculate "Yes" and "No" token regarding trading result
+```rust
+pub fn set_token_price(&mut self, sell_token_amount: u64, is_yes: bool) -> Result<()> {
+        if is_yes {
+            self.token_a_amount = self.token_a_amount - sell_token_amount;
+            self.token_price_b = self.token_price_b + sell_token_amount;
+        } else {
+            self.token_b_amount = self.token_b_amount - sell_token_amount;
+            self.token_price_a = self.token_price_a + sell_token_amount;
+        }
 
+        self.token_price_a = self
+            .total_reserve
+            .checked_mul(self.token_a_amount + self.token_b_amount)
+            .ok_or(ContractError::ArithmeticError)?
+            .checked_div(self.token_a_amount)
+            .ok_or(ContractError::ArithmeticError)?;
+        self.token_price_b = self
+            .total_reserve
+            .checked_mul(self.token_a_amount + self.token_b_amount)
+            .ok_or(ContractError::ArithmeticError)?
+            .checked_div(self.token_b_amount)
+            .ok_or(ContractError::ArithmeticError)?;
+        Ok(())
+    }
+```
 ### 3️⃣ Market Resolution
 - Switchboard Oracle fetches real-world data  
 - The contract determines the winning outcome  
