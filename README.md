@@ -28,7 +28,7 @@ const tx = await program.methods.initialize({
       payer: owner.publicKey,
       systemProgram: SystemProgram.programId,
     }).signers([owner]).rpc();
-
+```
 ### 2️⃣ Trading Mechanism
 - Users can buy or sell **Yes/No** tokens  
 - Prices are determined based on market supply and demand  
