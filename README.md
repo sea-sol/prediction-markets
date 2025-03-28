@@ -44,9 +44,24 @@ pub struct Initialize<'info> {
     pub system_program: Program<'info, System>,
 }
 ```
-### 2️⃣ Trading Mechanism
-- Users can buy or sell **Yes/No** tokens  
-- Prices are determined based on market supply and demand  
+### 2️⃣ Market creation
+```typescript
+const tx = await program.methods.initMarket({
+      quest: 190,
+      tokenAmount: new BN(tokenAAmount),
+      tokenPrice: new BN(0.00005 * 10 ** 9),
+      nameA: "tokenA",
+      nameB: "tokenB",
+      symbolA: "tokenA",
+      symbolB: "tokenB",
+      urlA: "https://tokenA.com",
+      urlB: "https://tokenB.com",
+    }).accounts({
+      user: owner.publicKey,
+      feeAuthority: feeAuthority,
+      market,
+...
+```
 
 ### 3️⃣ Market Resolution
 - Switchboard Oracle fetches real-world data  
