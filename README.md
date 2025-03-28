@@ -145,6 +145,26 @@ if market_balance >= ctx.accounts.global.market_count {
 
 ![image](https://github.com/user-attachments/assets/b183f8bd-7cc4-403a-88c7-941cd9d94b8b)
 
+### 4️⃣ Betting on Market
+- Resolve Market prediction result from Oracle.
+```rust
+let feed = &ctx.accounts.feed_aggregator.load()?;
+let current_sol_price: f64 = feed.get_result()?.try_into()?;
+
+msg!("🎫Current SOL/USD price 🎫{}", current_sol_price);
+
+let feed_account = ctx.accounts.feed.data.borrow();
+let feed: std::cell::Ref<'_, PullFeedAccountData> =
+  PullFeedAccountData::parse(feed_account).unwrap();
+msg!("🎫price 🎫 {:?}", feed.value());
+
+if ctx.accounts.market.quest <= feed.value().unwrap().try_into().unwrap() {
+  ctx.accounts.market.update_result(true);
+} else {
+  ctx.accounts.market.update_result(false);
+}
+```
+
 ---
 
 ## 🛠 Installation & Setup
