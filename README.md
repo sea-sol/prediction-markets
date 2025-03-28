@@ -140,7 +140,10 @@ if market_balance >= ctx.accounts.global.market_count {
     }).transaction();
 ```
 - Prices of both token will be changed ans flowing token amount.
-  ![image](https://github.com/user-attachments/assets/491b4397-6a30-4c95-a3b7-2c45f5fdfe7c)
+
+![image](https://github.com/user-attachments/assets/43a27f40-ab88-48d1-a8ec-52a3a276c840)
+
+![image](https://github.com/user-attachments/assets/b183f8bd-7cc4-403a-88c7-941cd9d94b8b)
 
 ---
 
