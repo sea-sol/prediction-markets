@@ -37,7 +37,7 @@ pub fn get_oracle_res(ctx: Context<GetOracleRes>) -> Result<()> {
         PullFeedAccountData::parse(feed_account).unwrap();
     msg!("🎫price 🎫 {:?}", feed.value());
 
-    if ctx.accounts.market.quest <= feed.value().unwrap().try_into().unwrap() {
+    if ctx.accounts.market.value <= feed.value().unwrap().try_into().unwrap() {
         ctx.accounts.market.update_result(true);
     } else {
         ctx.accounts.market.update_result(false);

@@ -20,7 +20,8 @@ pub struct OracleResUpdated {
 #[event]
 pub struct MarketCreated {
     pub market_id: Pubkey,
-    pub quest: u16,
+    pub value: u64,
+    pub range: u8,
     pub creator: Pubkey,
     pub feed: Pubkey,
     pub token_a: Pubkey,

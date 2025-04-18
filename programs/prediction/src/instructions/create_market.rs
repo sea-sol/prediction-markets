@@ -19,7 +19,7 @@ pub struct CreateMarket<'info> {
     /// CHECK: global fee authority is checked in constraint
     #[account(
         mut,
-        constraint = fee_authority.key() == global.fee_authority @ ContractError::InvalidFeeAuthority
+        constraint = fee_authority.key() == global_pda.fee_authority @ ContractError::InvalidFeeAuthority
     )]
     pub fee_authority: AccountInfo<'info>,
 
@@ -27,7 +27,7 @@ pub struct CreateMarket<'info> {
         init,
         payer = user,
         space = 8 + Market::INIT_SPACE,
-        seeds = [MARKET_SEED.as_bytes(), user.key().as_ref()],
+        seeds = [MARKET_SEED.as_bytes(), &params.market_id.as_bytes()],
         bump
     )]
     /// CHECK: global fee authority is checked in constraint
@@ -36,7 +36,7 @@ pub struct CreateMarket<'info> {
         seeds = [GLOBAL_SEED.as_bytes()],
         bump
     )]
-    pub global: Box<Account<'info, Global>>,
+    pub global_pda: Box<Account<'info, Global>>,
     /// CHECK: via switchboard sdk
     pub feed: AccountInfo<'info>,
 
@@ -53,7 +53,7 @@ pub struct CreateMarket<'info> {
         seeds = [MINT_SEED_A.as_bytes(), market.key().as_ref()],
         bump,
         payer = user,
-        mint::decimals = global.decimal,
+        mint::decimals = global_pda.decimal,
         mint::authority = market,
     )]
     token_mint_a: Box<Account<'info, Mint>>,
@@ -62,7 +62,7 @@ pub struct CreateMarket<'info> {
         seeds = [MINT_SEED_B.as_bytes(), market.key().as_ref()],
         bump,
         payer = user,
-        mint::decimals = global.decimal,
+        mint::decimals = global_pda.decimal,
         mint::authority = market
     )]
     token_mint_b: Box<Account<'info, Mint>>,
@@ -81,17 +81,19 @@ impl CreateMarket<'_> {
     pub fn create_market(ctx: Context<CreateMarket>, params: MarketParams) -> Result<()> {
         // update market settings
         let _ = ctx.accounts.market.update_market_settings(
-            params.quest,
+            params.value,
+            params.range,
             ctx.accounts.user.key(),
             ctx.accounts.feed.key(),
             ctx.accounts.token_mint_a.key(),
             ctx.accounts.token_mint_b.key(),
             params.token_amount,
             params.token_price,
+            params.date,
         );
 
-        let binding = ctx.accounts.user.key();
-        let mint_authority_signer: [&[u8]; 3] = Market::get_signer(&ctx.bumps.market, &binding);
+        let mint_authority_signer: [&[u8]; 3] =
+            Market::get_signer(&ctx.bumps.market, &params.market_id.as_bytes());
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
 
         msg!("🎫here metadata creation 🎫");
@@ -118,7 +120,7 @@ impl CreateMarket<'_> {
         let transfer_instruction = solana_program::system_instruction::transfer(
             ctx.accounts.user.key,
             ctx.accounts.fee_authority.key,
-            ctx.accounts.global.creator_fee_amount,
+            ctx.accounts.global_pda.creator_fee_amount,
         );
 
         // Invoke the transfer instruction
@@ -134,7 +136,8 @@ impl CreateMarket<'_> {
 
         emit!(MarketCreated {
             market_id: ctx.accounts.market.key(),
-            quest: ctx.accounts.market.quest,
+            value: ctx.accounts.market.value,
+            range: ctx.accounts.market.range,
             creator: ctx.accounts.user.key(),
             feed: ctx.accounts.feed.key(),
             token_a: ctx.accounts.token_mint_a.key(),

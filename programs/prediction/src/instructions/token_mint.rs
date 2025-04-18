@@ -6,6 +6,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{mint_to, Mint, MintTo, Token, TokenAccount};
 
 #[derive(Accounts)]
+#[instruction(market_id: String)]
 pub struct TokenMint<'info> {
     #[account(
         init_if_needed,
@@ -34,7 +35,7 @@ pub struct TokenMint<'info> {
 
     #[account(
         mut,
-        seeds = [MARKET_SEED.as_bytes(), user.key().as_ref()],
+        seeds = [MARKET_SEED.as_bytes(), &market_id.as_bytes()],
         bump
     )]
     /// CHECK: global fee authority is checked in constraint
@@ -71,9 +72,9 @@ pub struct TokenMint<'info> {
 }
 
 impl TokenMint<'_> {
-    pub fn token_mint(ctx: Context<TokenMint>) -> Result<()> {
-        let binding = ctx.accounts.user.key();
-        let mint_authority_signer: [&[u8]; 3] = Market::get_signer(&ctx.bumps.market, &binding);
+    pub fn token_mint(ctx: Context<TokenMint>, market_id: String) -> Result<()> {
+        let mint_authority_signer: [&[u8]; 3] =
+            Market::get_signer(&ctx.bumps.market, &market_id.as_bytes());
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
 
         let decimal_multiplier = 10u64.pow(ctx.accounts.global.decimal as u32);

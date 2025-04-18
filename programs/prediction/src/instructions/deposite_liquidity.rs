@@ -12,9 +12,6 @@ pub struct DepositLiquidity<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
-    /// CHECK: creator is checked in constraint
-    pub creator: AccountInfo<'info>,
-
     /// CHECK: global fee authority is checked in constraint
     #[account(
         mut,
@@ -24,9 +21,7 @@ pub struct DepositLiquidity<'info> {
 
     #[account(
         mut,
-        seeds = [MARKET_SEED.as_bytes(), creator.key().as_ref()],
         constraint = market.market_status == MarketStatus::Prepare @ ContractError::NotPreparing,
-        bump
     )]
     pub market: Account<'info, Market>,
 

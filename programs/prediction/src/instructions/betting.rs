@@ -93,7 +93,7 @@ impl Betting<'_> {
         // Transfer token to user
         let binding = ctx.accounts.creator.key();
         let mint_authority_signer: [&[u8]; 3] =
-            Market::get_signer(&ctx.bumps.market, &binding);
+            Market::get_signer(&ctx.bumps.market, &params.market_id.as_bytes());
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
 
         let token_amount = params

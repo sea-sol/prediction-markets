@@ -8,7 +8,8 @@ use anchor_lang::prelude::*;
 pub struct Market {
     pub creator: Pubkey,
     pub feed: Pubkey,
-    pub quest: u16,
+    pub value: u64,
+    pub range: u8,
     pub market_status: MarketStatus,
     pub result: bool,
     pub token_a: Pubkey,
@@ -20,6 +21,7 @@ pub struct Market {
     pub yes_amount: u16,
     pub no_amount: u16,
     pub total_reserve: u64,
+    pub resolution_date: i64,
 }
 
 impl Market {
@@ -51,26 +53,29 @@ impl Market {
         Ok(())
     }
 
-    pub fn get_signer<'a>(bump: &'a u8, user: &'a Pubkey) -> [&'a [u8]; 3] {
+    pub fn get_signer<'a>(bump: &'a u8, market_id: &'a [u8]) -> [&'a [u8]; 3] {
         [
             MARKET_SEED.as_bytes(),
-            user.as_ref(),
+            market_id,
             std::slice::from_ref(bump),
         ]
     }
 
     pub fn update_market_settings(
         &mut self,
-        quest: u16,
+        value: u64,
+        range: u8,
         creator: Pubkey,
         feed: Pubkey,
         token_a: Pubkey,
         token_b: Pubkey,
         token_amount: u64,
         token_price: u64,
+        date: i64,
     ) -> Result<()> {
         self.creator = creator;
-        self.quest = quest;
+        self.value = value;
+        self.range = range;
         self.feed = feed;
         self.token_a = token_a;
         self.token_b = token_b;
@@ -80,6 +85,7 @@ impl Market {
         self.token_price_b = token_price;
         self.yes_amount = 1;
         self.no_amount = 1;
+        self.resolution_date = date;
 
         let total_token = token_amount
             .checked_add(token_amount)
@@ -114,9 +120,12 @@ pub enum MarketStatus {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct MarketParams {
-    pub quest: u16,
+    pub value: u64,
+    pub range: u8,
+    pub date: i64,
     pub token_amount: u64,
     pub token_price: u64,
+    pub market_id: String,
     pub name_a: Option<String>,
     pub name_b: Option<String>,
     pub symbol_a: Option<String>,
@@ -127,6 +136,7 @@ pub struct MarketParams {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct BettingParams {
+    pub market_id: String,
     pub amount: u64,
     pub is_yes: bool,
 }

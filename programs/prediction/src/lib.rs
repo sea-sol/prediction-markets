@@ -14,7 +14,7 @@ use states::{
     market::{BettingParams, MarketParams},
 };
 
-declare_id!("Da4udDYBTFUrdCjRkstWMMpxQdPi6pkq7CXicSUNZA2u");
+declare_id!("8CSBdHqRErYAERtVLutBkkBCWcKLimqRzvZ7kXKujcGC");
 
 #[program]
 pub mod prediction {
@@ -40,7 +40,7 @@ pub mod prediction {
         Betting::betting(ctx, params)
     }
 
-    pub fn mint_token(ctx: Context<TokenMint>) -> Result<()> {
-        TokenMint::token_mint(ctx)
+    pub fn mint_token(ctx: Context<TokenMint>, market_id: String) -> Result<()> {
+        TokenMint::token_mint(ctx, market_id)
     }
 }
