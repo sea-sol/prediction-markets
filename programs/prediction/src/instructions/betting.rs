@@ -1,9 +1,10 @@
-use crate::constants::{GLOBAL_SEED, MARKET_SEED};
+use crate::constants::GLOBAL_SEED;
 use crate::errors::ContractError;
 use crate::states::{global::*, market::*};
 use anchor_lang::{prelude::*, solana_program};
 use anchor_spl::token::{Mint, TokenAccount, Token};
 use crate::utils::token_transfer;
+use crate::events::BettingEvent;
 
 #[derive(Accounts)]
 pub struct Betting<'info> {
@@ -39,9 +40,7 @@ pub struct Betting<'info> {
 
     #[account(
         mut,
-        seeds = [MARKET_SEED.as_bytes(), creator.key().as_ref()],
         constraint = market.market_status == MarketStatus::Active @ ContractError::MarketNotActive,
-        bump
     )]
     pub market: Account<'info, Market>,
 
@@ -90,10 +89,8 @@ impl Betting<'_> {
                 &[],
             )?;
             
-        // Transfer token to user
-        let binding = ctx.accounts.creator.key();
         let mint_authority_signer: [&[u8]; 3] =
-            Market::get_signer(&ctx.bumps.market, &params.market_id.as_bytes());
+            Market::get_signer(&market.bump, &params.market_id.as_bytes());
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
 
         let token_amount = params
@@ -173,6 +170,11 @@ impl Betting<'_> {
         }
 
         let _ = market.set_token_price(params.amount, params.is_yes)?;
+
+        emit!(BettingEvent{
+            token_a_price: market.token_price_a,
+            token_b_price: market.token_price_b
+        });
         Ok(())
     }
 }

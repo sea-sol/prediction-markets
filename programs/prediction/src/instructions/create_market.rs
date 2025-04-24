@@ -95,7 +95,7 @@ impl CreateMarket<'_> {
         let mint_authority_signer: [&[u8]; 3] =
             Market::get_signer(&ctx.bumps.market, &params.market_id.as_bytes());
         let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
-
+        ctx.accounts.market.bump = ctx.bumps.market;
         msg!("🎫here metadata creation 🎫");
         // initialize Yes token metadata
         ctx.accounts.intialize_meta(

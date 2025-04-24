@@ -1,4 +1,4 @@
-use crate::constants::{GLOBAL_SEED, MARKET_SEED};
+use crate::constants::GLOBAL_SEED;
 use crate::errors::ContractError;
 use crate::events::MarketStatusUpdated;
 use crate::states::{

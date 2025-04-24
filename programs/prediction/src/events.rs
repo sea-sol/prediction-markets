@@ -20,7 +20,7 @@ pub struct OracleResUpdated {
 #[event]
 pub struct MarketCreated {
     pub market_id: Pubkey,
-    pub value: u64,
+    pub value: f64,
     pub range: u8,
     pub creator: Pubkey,
     pub feed: Pubkey,
@@ -38,4 +38,10 @@ pub struct MarketCreated {
 pub struct MarketStatusUpdated {
     pub market_id: Pubkey,
     pub market_status: MarketStatus,
+}
+
+#[event]
+pub struct BettingEvent {
+    pub token_a_price: u64,
+    pub token_b_price: u64,
 }

@@ -8,7 +8,7 @@ use anchor_lang::prelude::*;
 pub struct Market {
     pub creator: Pubkey,
     pub feed: Pubkey,
-    pub value: u64,
+    pub value: f64,
     pub range: u8,
     pub market_status: MarketStatus,
     pub result: bool,
@@ -22,6 +22,7 @@ pub struct Market {
     pub no_amount: u16,
     pub total_reserve: u64,
     pub resolution_date: i64,
+    pub bump: u8,
 }
 
 impl Market {
@@ -63,7 +64,7 @@ impl Market {
 
     pub fn update_market_settings(
         &mut self,
-        value: u64,
+        value: f64,
         range: u8,
         creator: Pubkey,
         feed: Pubkey,
@@ -120,7 +121,7 @@ pub enum MarketStatus {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct MarketParams {
-    pub value: u64,
+    pub value: f64,
     pub range: u8,
     pub date: i64,
     pub token_amount: u64,
