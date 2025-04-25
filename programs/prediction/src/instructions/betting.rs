@@ -11,6 +11,10 @@ pub struct Betting<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
+    #[account(
+        mut,
+        constraint = market.creator == creator.key() @ ContractError::InvalidCreator
+    )]
     /// CHECK: creator is checked in constraint
     pub creator: AccountInfo<'info>,
 
@@ -118,6 +122,7 @@ impl Betting<'_> {
             .ok_or(ContractError::ArithmeticError)?
             .checked_div(100)
             .ok_or(ContractError::ArithmeticError)?;
+
         msg!("🎫fee_amount_to_auth 🎫 {}", fee_amount_to_auth);
     
         let transfer_auth_instruction = solana_program::system_instruction::transfer(

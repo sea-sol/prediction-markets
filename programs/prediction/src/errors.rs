@@ -13,6 +13,8 @@ pub enum ContractError {
     SolPriceBelowUnlockPrice,
     #[msg("Arithmetic error")]
     ArithmeticError,
+    #[msg("Invalid creator")]
+    InvalidCreator,
     #[msg("Invalid fee authority")]
     InvalidFeeAuthority,
     #[msg("Not preparing status")]
@@ -21,4 +23,6 @@ pub enum ContractError {
     InvalidMarket,
     #[msg("Market is not active")]
     MarketNotActive,
+    #[msg("Invalid Admin")]
+    InvalidAdmin,
 }
