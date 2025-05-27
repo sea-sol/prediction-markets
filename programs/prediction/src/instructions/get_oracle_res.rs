@@ -1,47 +1,55 @@
-use crate::constants::{MARKET_SEED, SOL_USDC_FEED};
+use crate::constants::GLOBAL_SEED;
+use crate::errors::ContractError;
 use crate::events::OracleResUpdated;
+use crate::states::global::Global;
 use crate::states::market::Market;
 use anchor_lang::prelude::*;
-use std::str::FromStr;
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
-use switchboard_solana::AggregatorAccountData;
 
 #[derive(Accounts)]
 pub struct GetOracleRes<'info> {
-    #[account(mut)]
-    pub user: Signer<'info>,
     #[account(
         mut,
-        seeds = [MARKET_SEED.as_bytes(), user.key().as_ref()],
-        bump
+        constraint = user.key() == global.admin @ ContractError::InvalidAdmin
     )]
+    pub user: Signer<'info>,
+    #[account(mut)]
     /// CHECK: global fee authority is checked in constraint
     pub market: Box<Account<'info, Market>>,
+
     #[account(
-        address = Pubkey::from_str(SOL_USDC_FEED).unwrap()
+        seeds = [GLOBAL_SEED.as_bytes()],
+        bump
     )]
-    pub feed_aggregator: AccountLoader<'info, AggregatorAccountData>,
+    pub global: Box<Account<'info, Global>>,
+
     /// CHECK: via switchboard sdk
     pub feed: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 
 pub fn get_oracle_res(ctx: Context<GetOracleRes>) -> Result<()> {
-    let feed = &ctx.accounts.feed_aggregator.load()?;
-    let current_sol_price: f64 = feed.get_result()?.try_into()?;
-
-    msg!("🎫Current SOL/USD price 🎫{}", current_sol_price);
+    let market = &mut ctx.accounts.market;
 
     let feed_account = ctx.accounts.feed.data.borrow();
     let feed: std::cell::Ref<'_, PullFeedAccountData> =
         PullFeedAccountData::parse(feed_account).unwrap();
-    msg!("🎫price 🎫 {:?}", feed.value());
 
-    if ctx.accounts.market.value <= feed.value().unwrap().try_into().unwrap() {
-        ctx.accounts.market.update_result(true);
+    msg!("🎫price 🎫 {:?}", feed.value());
+    msg!("🎫range 🎫 {:?}", market.range);
+
+    let feed_value: f64 = feed.value().unwrap().try_into().unwrap();
+
+    market.result = if market.range == 0 && market.value > feed_value {
+        true
+    } else if market.range == 1 && market.value == feed_value {
+        true
+    } else if market.range == 2 && market.value < feed_value {
+        true
     } else {
-        ctx.accounts.market.update_result(false);
-    }
+        false
+    };
+
     msg!("🎫result 🎫 {:?}", ctx.accounts.market.result);
 
     emit!(OracleResUpdated {

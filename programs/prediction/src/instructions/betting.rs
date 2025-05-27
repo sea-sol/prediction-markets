@@ -54,10 +54,10 @@ pub struct Betting<'info> {
     )]
     pub global: Account<'info, Global>,
     pub token_program: Program<'info, Token>,
-     /// CHECK: associated token program account
-     pub associated_token_program: UncheckedAccount<'info>,
-     /// CHECK: token metadata program account
-     pub token_metadata_program: UncheckedAccount<'info>,
+    /// CHECK: associated token program account
+    pub associated_token_program: UncheckedAccount<'info>,
+    /// CHECK: token metadata program account
+    pub token_metadata_program: UncheckedAccount<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -85,13 +85,13 @@ impl Betting<'_> {
 
         anchor_lang::solana_program::program::invoke_signed(
             &transfer_market_instruction,
-            &[
-                    ctx.accounts.user.to_account_info(),
-                    market.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                ],
-                &[],
-            )?;
+        &[
+                ctx.accounts.user.to_account_info(),
+                market.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            &[],
+        )?;
             
         let mint_authority_signer: [&[u8]; 3] =
             Market::get_signer(&market.bump, &params.market_id.as_bytes());

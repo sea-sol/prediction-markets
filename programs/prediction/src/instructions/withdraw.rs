@@ -3,15 +3,14 @@ use crate::errors::ContractError;
 use crate::states::global::Global;
 use crate::states::market::Market;
 use anchor_lang::prelude::*;
-use anchor_lang::{prelude::*, solana_program};
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
     #[account(
         mut,
-        constraint = user.key() == global.admin @ ContractError::InvalidAdmin
+        constraint = admin.key() == global.admin @ ContractError::InvalidAdmin
     )]
-    pub user: Signer<'info>,
+    pub admin: Signer<'info>,
 
     /// CHECK: sol reciever
     pub reciever: AccountInfo<'info>,
