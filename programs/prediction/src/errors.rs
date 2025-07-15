@@ -9,6 +9,8 @@ pub enum ContractError {
     StaleFeed,
     #[msg("Switchboard feed exceeded provided confidence interval")]
     ConfidenceIntervalExceeded,
+    #[msg("Invalid fund amount")]
+    InvalidFundAmount,
     #[msg("Current SOL price is not above Escrow unlock price.")]
     SolPriceBelowUnlockPrice,
     #[msg("Arithmetic error")]

@@ -5,11 +5,10 @@ pub struct GlobalInitialized {
     pub global_id: Pubkey,
     pub fee_recipient: Pubkey,
     pub creator_fee_amount: u64,
-    pub liqudity_user_fee_amount: u64,
-    pub betting_user_fee_amount: u64,
     pub market_count: u64,
     pub decimal: u8,
-    pub fee_percentage: u8,
+    pub fund_fee_percentage: f64,
+    pub betting_fee_percentage: f64,
 }
 
 #[event]

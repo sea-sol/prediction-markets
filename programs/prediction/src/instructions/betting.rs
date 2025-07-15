@@ -114,11 +114,8 @@ impl Betting<'_> {
             
         // Transfer fee to fee authority
         
-        let fee_amount_to_auth = ctx
-            .accounts
-            .global
-            .betting_user_fee_amount
-            .checked_mul(ctx.accounts.global.fee_percentage as u64)
+        let fee_amount_to_auth = sol_to_buy
+            .checked_mul(ctx.accounts.global.betting_fee_percentage as u64)
             .ok_or(ContractError::ArithmeticError)?
             .checked_div(100)
             .ok_or(ContractError::ArithmeticError)?;
@@ -136,33 +133,6 @@ impl Betting<'_> {
             &[
                 ctx.accounts.user.to_account_info(),
                 ctx.accounts.fee_authority.to_account_info(),
-                ctx.accounts.system_program.to_account_info(),
-            ],
-            &[],
-        )?;
-
-        // Transfer fee to creator
-        msg!("🎫fee_amount_to_creator 🎫 {}", ctx.accounts
-        .global
-        .betting_user_fee_amount
-        .checked_sub(fee_amount_to_auth)
-        .ok_or(ContractError::ArithmeticError)?);
-
-        let transfer_creator_instruction = solana_program::system_instruction::transfer(
-            ctx.accounts.user.key,
-            ctx.accounts.creator.key,
-            ctx.accounts
-                .global
-                .betting_user_fee_amount
-                .checked_sub(fee_amount_to_auth)
-                .ok_or(ContractError::ArithmeticError)?,
-        );
-
-        anchor_lang::solana_program::program::invoke_signed(
-            &transfer_creator_instruction,
-            &[
-                ctx.accounts.user.to_account_info(),
-                ctx.accounts.creator.to_account_info(),
                 ctx.accounts.system_program.to_account_info(),
             ],
             &[],

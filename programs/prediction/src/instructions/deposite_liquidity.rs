@@ -35,6 +35,8 @@ pub struct DepositLiquidity<'info> {
 }
 
 pub fn deposit_liquidity(ctx: Context<DepositLiquidity>, amount: u64) -> Result<()> {
+
+    require!(amount >= 100000, ContractError::InvalidFundAmount);
     // Transfer sol to market
     let liquidity_transfer_instruction = solana_program::system_instruction::transfer(
         ctx.accounts.user.key,
@@ -52,11 +54,17 @@ pub fn deposit_liquidity(ctx: Context<DepositLiquidity>, amount: u64) -> Result<
         &[],
     )?;
 
+    let fee_amount_to_auth = amount
+        .checked_mul(ctx.accounts.global.fund_fee_percentage as u64)
+        .ok_or(ContractError::ArithmeticError)?
+        .checked_div(100)
+        .ok_or(ContractError::ArithmeticError)?;
+
     // Transfer sol to fee authority
     let transfer_instruction = solana_program::system_instruction::transfer(
         ctx.accounts.user.key,
         &ctx.accounts.fee_authority.key(),
-        ctx.accounts.global.liqudity_user_fee_amount,
+        fee_amount_to_auth,
     );
 
     anchor_lang::solana_program::program::invoke_signed(

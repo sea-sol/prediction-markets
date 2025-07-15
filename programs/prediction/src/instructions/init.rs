@@ -23,21 +23,19 @@ pub fn init(ctx: Context<Initialize>, params: GlobalParams) -> Result<()> {
     global.admin = ctx.accounts.payer.key();
     global.fee_authority = params.fee_authority;
     global.creator_fee_amount = params.creator_fee_amount;
-    global.liqudity_user_fee_amount = params.liqudity_user_fee_amount;
-    global.betting_user_fee_amount = params.betting_user_fee_amount;
     global.market_count = params.market_count;
     global.decimal = params.decimal;
-    global.fee_percentage = params.fee_percentage;
+    global.fund_fee_percentage = params.fund_fee_percentage;
+    global.betting_fee_percentage = params.betting_fee_percentage;
 
     emit!(GlobalInitialized {
         global_id: global.key(),
         fee_recipient: global.fee_authority,
         creator_fee_amount: global.creator_fee_amount,
-        liqudity_user_fee_amount: global.liqudity_user_fee_amount,
-        betting_user_fee_amount: global.betting_user_fee_amount,
         market_count: global.market_count,
         decimal: global.decimal,
-        fee_percentage: global.fee_percentage,
+        fund_fee_percentage: global.fund_fee_percentage,
+        betting_fee_percentage: global.betting_fee_percentage,
     });
 
     Ok(())

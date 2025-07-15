@@ -15,7 +15,7 @@ use states::{
     market::{BettingParams, MarketParams},
 };
 
-declare_id!("8CSBdHqRErYAERtVLutBkkBCWcKLimqRzvZ7kXKujcGC");
+declare_id!("Bki3CWk4AmVF78zvh81rup2EK2iJY4WRCUXesAv8TECF");
 
 #[program]
 pub mod prediction {

@@ -138,6 +138,7 @@ pub struct MarketParams {
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct BettingParams {
     pub market_id: String,
+    pub time: i64,
     pub amount: u64,
     pub is_yes: bool,
 }

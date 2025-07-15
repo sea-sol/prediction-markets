@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-prediction = "FW9KvGkRcnibqm5LSE4J8sq3homgVizKGBoNA511gR2s"
+prediction = "Bki3CWk4AmVF78zvh81rup2EK2iJY4WRCUXesAv8TECF"
 
 [registry]
 url = "https://api.apr.dev"
