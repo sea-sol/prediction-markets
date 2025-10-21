@@ -30,10 +30,6 @@ pub struct Withdraw<'info> {
 
 impl Withdraw<'_> {
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
-        // let market = &mut ctx.accounts.market;
-        // let mint_authority_signer: [&[u8]; 3] =
-        //     Market::get_signer(&market.bump, &market_id.as_bytes());
-        // let mint_auth_signer_seeds = &[&mint_authority_signer[..]];
         msg!("market lamports {}", ctx.accounts.market.get_lamports());
         ctx.accounts.market.sub_lamports(amount).unwrap();
         ctx.accounts.reciever.add_lamports(amount).unwrap();
