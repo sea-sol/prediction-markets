@@ -7,22 +7,12 @@ use anchor_spl::{
     metadata::{
         create_metadata_accounts_v3, mpl_token_metadata::types::DataV2, CreateMetadataAccountsV3,
     },
-    token::{Mint, Token},
 };
 
 #[derive(Accounts)]
 #[instruction(params: MarketParams)]
 pub struct CreateMarket<'info> {
     #[account(mut)]
-    pub user: Signer<'info>,
-
-    /// CHECK: global fee authority is checked in constraint
-    #[account(
-        mut,
-        constraint = fee_authority.key() == global_pda.fee_authority @ ContractError::InvalidFeeAuthority
-    )]
-    pub fee_authority: AccountInfo<'info>,
-
     #[account(
         init,
         payer = user,
@@ -30,23 +20,27 @@ pub struct CreateMarket<'info> {
         seeds = [MARKET_SEED.as_bytes(), &params.market_id.as_bytes()],
         bump
     )]
+    pub user: Signer<'info>,
+
+    /// CHECK: global fee authority is checked in constraint
+
+    pub fee_authority: AccountInfo<'info>,
+
     /// CHECK: global fee authority is checked in constraint
     pub market: Box<Account<'info, Market>>,
-    #[account(
-        seeds = [GLOBAL_SEED.as_bytes()],
-        bump
-    )]
     pub global_pda: Box<Account<'info, Global>>,
     /// CHECK: via switchboard sdk
     pub feed: AccountInfo<'info>,
 
     ///CHECK: Using seed to validate metadata account
+    #[account(
+        seeds = [GLOBAL_SEED.as_bytes()],
+        bump
+    )]
     #[account(mut)]
     metadata_a: UncheckedAccount<'info>,
 
     ///CHECK: Using seed to validate metadata account
-    #[account(mut)]
-    metadata_b: UncheckedAccount<'info>,
 
     #[account(
         init,
@@ -65,8 +59,7 @@ pub struct CreateMarket<'info> {
         mint::decimals = global_pda.decimal,
         mint::authority = market
     )]
-    token_mint_b: Box<Account<'info, Mint>>,
-
+    
     pub token_program: Program<'info, Token>,
     /// CHECK: associated token program account
     pub associated_token_program: UncheckedAccount<'info>,
@@ -75,6 +68,7 @@ pub struct CreateMarket<'info> {
     /// CHECK: rent account
     pub rent: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
+    token_mint_b: Box<Account<'info, Mint>>,
 }
 
 impl CreateMarket<'_> {
@@ -82,8 +76,6 @@ impl CreateMarket<'_> {
         // update market settings
         let _ = ctx.accounts.market.update_market_settings(
             params.value,
-            params.range,
-            ctx.accounts.user.key(),
             ctx.accounts.feed.key(),
             ctx.accounts.token_mint_a.key(),
             ctx.accounts.token_mint_b.key(),

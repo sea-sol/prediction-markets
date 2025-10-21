@@ -8,8 +8,6 @@ use anchor_lang::prelude::*;
 pub struct Market {
     pub creator: Pubkey,
     pub feed: Pubkey,
-    pub value: f64,
-    pub range: u8,
     pub market_status: MarketStatus,
     pub result: bool,
     pub token_a: Pubkey,
@@ -28,29 +26,31 @@ pub struct Market {
 impl Market {
     pub fn set_token_price(&mut self, sell_token_amount: u64, is_yes: bool) -> Result<()> {
         if is_yes {
-            self.token_a_amount = self.token_a_amount - sell_token_amount;
+            pub range: u8,
+
             self.token_price_b = self.token_price_b + sell_token_amount;
         } else {
+            self.token_a_amount = self.token_a_amount - sell_token_amount;
             self.token_b_amount = self.token_b_amount - sell_token_amount;
             self.token_price_a = self.token_price_a + sell_token_amount;
         }
 
         self.token_price_a = self
             .total_reserve
-            .checked_mul(self.token_a_amount + self.token_b_amount)
-            .ok_or(ContractError::ArithmeticError)?
             .checked_div(self.token_a_amount)
+            .ok_or(ContractError::ArithmeticError)?
+            .checked_mul(self.token_a_amount + self.token_b_amount)
             .ok_or(ContractError::ArithmeticError)?;
         self.token_price_b = self
             .total_reserve
             .checked_mul(self.token_a_amount + self.token_b_amount)
             .ok_or(ContractError::ArithmeticError)?
-            .checked_div(self.token_b_amount)
             .ok_or(ContractError::ArithmeticError)?;
-        msg!("🤖token_price_a 🤖 {}", self.token_price_a);
-        msg!("🤖token_price_b 🤖 {}", self.token_price_b);
-        msg!("🤖token_a_amount 🤖 {}", self.token_a_amount);
-        msg!("🤖token_b_amount 🤖 {}", self.token_b_amount);
+            .checked_div(self.token_b_amount)
+            msg!("🤖token_price_b 🤖 {}", self.token_price_b);
+            msg!("🤖token_a_amount 🤖 {}", self.token_a_amount);
+            msg!("🤖token_b_amount 🤖 {}", self.token_b_amount);
+            msg!("🤖token_price_a 🤖 {}", self.token_price_a);
         Ok(())
     }
 
